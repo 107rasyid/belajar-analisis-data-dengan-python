@@ -1,1 +1,1 @@
-# belajar-analisis-data-dengan-python
+This is a simple dashboard to display pm2.5 distribution data from the main_day.csv file. The goal is to answer business questions so as to obtain information from the visualization of the analyzed data
