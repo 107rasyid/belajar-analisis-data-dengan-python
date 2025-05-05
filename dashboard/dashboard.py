@@ -62,11 +62,7 @@ df_filtered = df[
 # Main Title
 st.title("🛰️ Dashboard Analisis PM2.5")
 
-# ============================================
-# Visualisasi
-# ============================================
-
-# 1. Distribusi PM2.5
+# Distribusi PM2.5
 st.subheader("Distribusi PM2.5 di Semua Stasiun")
 pm25_stats = df_filtered["PM2.5"].describe().round(2)
 fig1 = px.histogram(
@@ -79,7 +75,7 @@ fig1.add_vline(
 )
 st.plotly_chart(fig1, use_container_width=True)
 
-# 2. Arah Angin Dominan
+# Arah Angin Dominan
 st.subheader("5 Arah Angin Dominan")
 wind_counts = df_filtered["wd"].value_counts().nlargest(5)
 fig2 = px.pie(
@@ -88,7 +84,7 @@ fig2 = px.pie(
 )
 st.plotly_chart(fig2, use_container_width=True)
 
-# 3. Pola Harian PM2.5
+# Pola Harian PM2.5
 st.subheader("Rata-Rata PM2.5 per Jam")
 hourly_avg = df_filtered.groupby(
     df_filtered["datetime"].dt.hour
@@ -106,7 +102,7 @@ st.write(
     kecepatan angin."""
 )
 
-# 4. Insight Tren PM2.5 Bulanan
+# Insight Tren PM2.5 Bulanan
 df_filtered['month'] = df_filtered['datetime'].dt.month
 monthly_avg_pm25 = df_filtered.groupby('month')['PM2.5'].mean().round(2)
 st.subheader("Rata-Rata PM2.5 Bulanan")
@@ -186,8 +182,7 @@ df_season = (
 )
 
 # Print ringkasan statistik
-print("Ringkasan Statistik PM2.5 per Musim:")
-print(df_season)
+st.header("📊 perbedaan Rata-Rata Konsentrasi PM2.5 Antar Musim")
 
 # Bar Chart rata-rata PM2.5 per musim
 plt.figure(figsize=(8,5))
@@ -227,6 +222,7 @@ def categorize_pollution(pm25):
         return 'Rendah'
 
 # Categorize pollution levels for each station
+st.header("📊 Level Polusi Tiap Stasiun")
 pm25_avg = df.groupby('station')['PM2.5'].mean().reset_index()
 pm25_avg['kategori'] = pm25_avg['PM2.5'].apply(categorize_pollution)
 
