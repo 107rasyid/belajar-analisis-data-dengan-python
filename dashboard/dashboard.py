@@ -244,21 +244,22 @@ st.pyplot(fig3)
 # Kesimpulan
 st.subheader("Kesimpulan")
 st.write(
-    """Berdasarkan analisis yang dilakukan, kita dapat menarik beberapa kesimpulan penting:
-    1. PM2.5 di wilayah perkotaan cenderung lebih tinggi daripada di wilayah suburban.
-    2. Secara musiman konsentrasi rata-rata PM2.5 tertinggi terjadi pada musim dingin 
-    (Desember–Februari) dengan nilai sekitar 95.7 µg/m³. Rata-rata terendah terjadi pada 
-    musim panas (Juni–Agustus) dengan rata-rata 64.7 µg/m³. Hal ini menunjukkan bahwa musim 
-    dingin merupakan periode paling kritis terhadap paparan polusi udara, kemungkinan besar 
-    disebabkan oleh:
-    🔥 Meningkatnya pembakaran bahan bakar fosil untuk pemanasan.
-    🌬️ Penurunan kecepatan angin yang menyebabkan polusi terjebak di atmosfer.
-    🌡️ Fenomena temperature inversion yang menahan polutan di lapisan bawah udara.
-
-    Dalam skala bulanan:
-    Bulan dengan rata-rata PM2.5 tertinggi adalah Desember (104.58 µg/m³).
-    Bulan terendah adalah Agustus (53.47 µg/m³).
-    Pola ini memperkuat indikasi bahwa faktor meteorologis sangat mempengaruhi tingkat pencemaran udara.
-    
     """
+Berdasarkan analisis yang dilakukan, beberapa kesimpulan penting dapat diambil:
+
+1. **Konsentrasi PM2.5 di wilayah perkotaan** cenderung lebih tinggi dibandingkan wilayah suburban.
+2. **Secara musiman**, konsentrasi rata-rata PM2.5 tertinggi terjadi pada musim **dingin** (Desember–Februari), 
+   dengan nilai sekitar **95.7 µg/m³**. Rata-rata terendah tercatat pada musim **panas** (Juni–Agustus), yaitu **64.7 µg/m³**. 
+   Hal ini menunjukkan bahwa musim dingin merupakan periode paling kritis terhadap paparan polusi udara, kemungkinan besar 
+   disebabkan oleh:
+   - 🔥 Peningkatan pembakaran bahan bakar fosil untuk pemanasan.
+   - 🌬️ Penurunan kecepatan angin yang membuat polutan terjebak di atmosfer.
+   - 🌡️ Fenomena *temperature inversion* yang menahan polutan di lapisan bawah udara.
+
+3. **Dalam skala bulanan**:
+   - Bulan dengan rata-rata PM2.5 tertinggi adalah **Desember** (104.58 µg/m³).
+   - Bulan dengan rata-rata terendah adalah **Agustus** (53.47 µg/m³).
+
+Pola ini memperkuat indikasi bahwa faktor meteorologis sangat mempengaruhi tingkat pencemaran udara.
+"""
 )
