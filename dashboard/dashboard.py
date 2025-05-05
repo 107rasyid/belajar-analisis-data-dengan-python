@@ -99,43 +99,14 @@ fig3 = px.line(
 )
 fig3.update_layout(xaxis_title="Jam", yaxis_title="PM2.5 (µg/m³)")
 st.plotly_chart(fig3, use_container_width=True)
+st.write(
+    """Dari tren harian, kita dapat melihat bahwa pada pagi hari jam 6-7 pagi merupakan waktu dengan nilai PM2.5 
+    terendah yaitu ~74 µg/m³ hal ini dikarenakan aktivitas masih rendah dan angin pagi. PM2.5 mencapai nilai 
+    tertinggi pada jam 10-11 malam yaitu ~88-89 µg/m³ yang dikarenakan akumulasi emisi sepanjang hari dan penurunan 
+    kecepatan angin."""
+)
 
-# ============================================
-# Insight dan Analisis Lanjutan
-# ============================================
-
-# Filter data for stations
-df_tren = df[df['station'].isin(['Aotizhongxin', 'Huairou'])].copy()
-df_tren['station'] = df_tren['station'].astype(str)
-
-# Calculate monthly average PM2.5
-monthly_pm25 = df_tren.groupby(
-    ['station', pd.Grouper(key='datetime', freq='ME')],
-    observed=True
-)['PM2.5'].mean().reset_index()
-
-# Plotting the trend
-# Pilih stasiun dan tahun
-st.sidebar.subheader("Filter Data")
-station_filter = st.sidebar.selectbox("Pilih Stasiun", monthly_pm25['station'].unique())
-year_filter = st.sidebar.selectbox("Pilih Tahun", sorted(monthly_pm25['datetime'].dt.year.unique()))
-
-# Filter data sesuai pilihan
-filtered_data = monthly_pm25[
-    (monthly_pm25['station'] == station_filter) &
-    (monthly_pm25['datetime'].dt.year == year_filter)
-]
-
-# Plot interaktif berdasarkan filter
-st.subheader(f"Tren PM2.5 Bulanan di {station_filter} - Tahun {year_filter}")
-fig, ax = plt.subplots(figsize=(12, 6))
-sns.lineplot(data=filtered_data, x='datetime', y='PM2.5', marker='o', ax=ax)
-ax.set_title(f"PM2.5 Bulanan di {station_filter} ({year_filter})")
-ax.set_xlabel("Bulan")
-ax.set_ylabel("PM2.5 (µg/m³)")
-st.pyplot(fig)
-
-# Insight Tren PM2.5 Bulanan
+# 4. Insight Tren PM2.5 Bulanan
 df_filtered['month'] = df_filtered['datetime'].dt.month
 monthly_avg_pm25 = df_filtered.groupby('month')['PM2.5'].mean().round(2)
 st.subheader("Rata-Rata PM2.5 Bulanan")
@@ -152,42 +123,7 @@ st.write(
     selama musim dingin."""
 )
 
-# Function to categorize pollution levels
-def categorize_pollution(pm25):
-    if pm25 > 90:
-        return 'Tinggi'
-    elif pm25 > 70:
-        return 'Sedang'
-    else:
-        return 'Rendah'
-
-# Categorize pollution levels for each station
-pm25_avg = df.groupby('station')['PM2.5'].mean().reset_index()
-pm25_avg['kategori'] = pm25_avg['PM2.5'].apply(categorize_pollution)
-
-# Plotting the pollution categories
-st.subheader("Kategori Tingkat Polusi Udara per Stasiun")
-fig3, ax3 = plt.subplots(figsize=(10, 6))
-sns.barplot(data=pm25_avg, x='station', y='PM2.5', hue='kategori', palette='viridis', dodge=False, ax=ax3)
-ax3.set_title('Kategori Tingkat Polusi Udara per Stasiun', fontsize=14)
-ax3.set_xlabel('Stasiun', fontsize=12)
-ax3.set_ylabel('Rata-Rata PM2.5 (µg/m³)', fontsize=12)
-ax3.set_xticklabels(ax3.get_xticklabels(), rotation=45)
-ax3.legend(title='Kategori')
-st.pyplot(fig3)
-
-# Kesimpulan
-st.subheader("Kesimpulan")
-st.write(
-    """Berdasarkan analisis yang dilakukan, kita dapat menarik beberapa kesimpulan penting:
-    1. PM2.5 di wilayah perkotaan (Aotizhongxin) cenderung lebih tinggi daripada di wilayah suburban (Huairou).
-    2. 
-    
-    Analisis ini dapat menjadi referensi dalam pembuatan kebijakan untuk meningkatkan kualitas udara di perkotaan.
-    """
-)
-
-# Halaman Komparasi Tren Dua Stasiun
+# Komparasi Tren Dua Stasiun
 st.header("📊 Komparasi Tren PM2.5 Bulanan Antar Stasiun")
 
 # Pilih dua stasiun
@@ -225,3 +161,90 @@ fig5.update_layout(xaxis_title='Bulan', yaxis_title='PM2.5 (µg/m³)')
 st.plotly_chart(fig5, use_container_width=True)
 
 st.caption("Gunakan grafik ini untuk membandingkan dinamika polusi udara antara dua stasiun di tahun yang sama.")
+
+# Hitung ringkasan statistik PM2.5 per musim
+df_season = (
+    df_clean
+      .groupby('season')['PM2.5']
+      .agg(['mean','median','std','count'])
+      .reindex(['Semi','Panas','Gugur','Dingin'])
+      .rename(columns={'mean':'Rata2','median':'Median','std':'StdDev','count':'N'})
+)
+
+# Print ringkasan statistik
+print("Ringkasan Statistik PM2.5 per Musim:")
+print(df_season)
+
+# Bar Chart rata-rata PM2.5 per musim
+plt.figure(figsize=(8,5))
+plt.bar(df_season.index, df_season['Rata2'])
+plt.title("Rata-Rata PM2.5 per Musim (Beijing, 2013–2017)")
+plt.xlabel("Musim")
+plt.ylabel("PM2.5 (µg/m³)")
+plt.tight_layout()
+plt.show()
+
+# Boxplot distribusi PM2.5 per musim
+plt.figure(figsize=(8,5))
+data = [df_clean[df_clean['season']==s]['PM2.5'] for s in df_season.index]
+plt.boxplot(data, labels=df_season.index)
+plt.title("Distribusi PM2.5 per Musim")
+plt.xlabel("Musim")
+plt.ylabel("PM2.5 (µg/m³)")
+plt.tight_layout()
+plt.show()
+
+st.write(
+    """Dari grafik tersebut, kita dapat melihat bahwa musim dingin mencatat rata-rata PM2.5 tertinggi (~95.7 µg/m³), 
+    jauh di atas musim lain. Sepanjang musim dingin (Nov–Feb), pembakaran batubara dan biomassa untuk pemanas rumah 
+    tangga di Beijing meningkat pesat, menyebabkan lonjakan emisi PM2.5. Musim panas menunjukkan rata-rata terendah 
+    (~64.7 µg/m³). Musim panas (Jun–Aug) didominasi oleh angin muson dan intensitas hujan yang lebih besar, memfasilitasi 
+    proses “wet deposition” sehingga PM2.5 tersapu dari atmosfer. Variabilitas (StdDev) terbesar juga terjadi pada musim 
+    dingin (107.7), menandakan fluktuasi ekstrem yang tinggi. Musim Semi dan Gugur berada di tengah.."""
+)
+
+# Function to categorize pollution levels
+def categorize_pollution(pm25):
+    if pm25 > 90:
+        return 'Tinggi'
+    elif pm25 > 70:
+        return 'Sedang'
+    else:
+        return 'Rendah'
+
+# Categorize pollution levels for each station
+pm25_avg = df.groupby('station')['PM2.5'].mean().reset_index()
+pm25_avg['kategori'] = pm25_avg['PM2.5'].apply(categorize_pollution)
+
+# Plotting the pollution categories
+st.subheader("Kategori Tingkat Polusi Udara per Stasiun")
+fig3, ax3 = plt.subplots(figsize=(10, 6))
+sns.barplot(data=pm25_avg, x='station', y='PM2.5', hue='kategori', palette='viridis', dodge=False, ax=ax3)
+ax3.set_title('Kategori Tingkat Polusi Udara per Stasiun', fontsize=14)
+ax3.set_xlabel('Stasiun', fontsize=12)
+ax3.set_ylabel('Rata-Rata PM2.5 (µg/m³)', fontsize=12)
+ax3.set_xticklabels(ax3.get_xticklabels(), rotation=45)
+ax3.legend(title='Kategori')
+st.pyplot(fig3)
+
+# Kesimpulan
+st.subheader("Kesimpulan")
+st.write(
+    """Berdasarkan analisis yang dilakukan, kita dapat menarik beberapa kesimpulan penting:
+    1. PM2.5 di wilayah perkotaan cenderung lebih tinggi daripada di wilayah suburban.
+    2. Secara musiman konsentrasi rata-rata PM2.5 tertinggi terjadi pada musim dingin 
+    (Desember–Februari) dengan nilai sekitar 95.7 µg/m³. Rata-rata terendah terjadi pada 
+    musim panas (Juni–Agustus) dengan rata-rata 64.7 µg/m³. Hal ini menunjukkan bahwa musim 
+    dingin merupakan periode paling kritis terhadap paparan polusi udara, kemungkinan besar 
+    disebabkan oleh:
+    🔥 Meningkatnya pembakaran bahan bakar fosil untuk pemanasan.
+    🌬️ Penurunan kecepatan angin yang menyebabkan polusi terjebak di atmosfer.
+    🌡️ Fenomena temperature inversion yang menahan polutan di lapisan bawah udara.
+
+    Dalam skala bulanan:
+    Bulan dengan rata-rata PM2.5 tertinggi adalah Desember (104.58 µg/m³).
+    Bulan terendah adalah Agustus (53.47 µg/m³).
+    Pola ini memperkuat indikasi bahwa faktor meteorologis sangat mempengaruhi tingkat pencemaran udara.
+    
+    """
+)
