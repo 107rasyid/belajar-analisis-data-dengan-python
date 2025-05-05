@@ -162,6 +162,20 @@ st.plotly_chart(fig5, use_container_width=True)
 
 st.caption("Gunakan grafik ini untuk membandingkan dinamika polusi udara antara dua stasiun di tahun yang sama.")
 
+# Tambah kolom 'season' ke df
+def get_season(month):
+    if month in [3, 4, 5]:
+        return 'Semi'
+    elif month in [6, 7, 8]:
+        return 'Panas'
+    elif month in [9, 10, 11]:
+        return 'Gugur'
+    else:
+        return 'Dingin'
+
+df["season"] = df["datetime"].dt.month.map(get_season)
+df_clean = df.dropna(subset=["PM2.5", "season"])
+
 # Hitung ringkasan statistik PM2.5 per musim
 df_season = (
     df_clean
@@ -182,7 +196,7 @@ plt.title("Rata-Rata PM2.5 per Musim (Beijing, 2013–2017)")
 plt.xlabel("Musim")
 plt.ylabel("PM2.5 (µg/m³)")
 plt.tight_layout()
-plt.show()
+st.pyplot(plt.gcf())
 
 # Boxplot distribusi PM2.5 per musim
 plt.figure(figsize=(8,5))
@@ -192,7 +206,7 @@ plt.title("Distribusi PM2.5 per Musim")
 plt.xlabel("Musim")
 plt.ylabel("PM2.5 (µg/m³)")
 plt.tight_layout()
-plt.show()
+st.pyplot(plt.gcf())
 
 st.write(
     """Dari grafik tersebut, kita dapat melihat bahwa musim dingin mencatat rata-rata PM2.5 tertinggi (~95.7 µg/m³), 
