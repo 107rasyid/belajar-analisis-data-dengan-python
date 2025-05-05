@@ -3,7 +3,6 @@ import pandas as pd
 import plotly.express as px
 import seaborn as sns
 import matplotlib.pyplot as plt
-import numpy as np
 
 # Page Configuration
 st.set_page_config(
@@ -116,33 +115,25 @@ monthly_pm25 = df_tren.groupby(
 )['PM2.5'].mean().reset_index()
 
 # Plotting the trend
-st.subheader("Tren PM2.5 Bulanan: Aotizhongxin (Perkotaan) vs. Huairou (Suburban)")
-fig1, ax1 = plt.subplots(figsize=(14, 7))
-sns.lineplot(
-    data=monthly_pm25,
-    x='datetime',
-    y='PM2.5',
-    hue='station',
-    style='station',
-    palette={'Aotizhongxin': 'red', 'Huairou': 'blue'},
-    markers=True,
-    dashes=[(2, 0), (4, 2)],  # Garis putus untuk Huairou
-    linewidth=2.5,
-    ax=ax1
-)
-ax1.set_title('Tren PM2.5 Bulanan: Aotizhongxin (Perkotaan) vs. Huairou (Suburban)', fontsize=16)
-ax1.set_xlabel('Tahun', fontsize=12)
-ax1.set_ylabel('PM2.5 (µg/m³)', fontsize=12)
-ax1.grid(alpha=0.3)
-st.pyplot(fig1)
+# Pilih stasiun dan tahun
+st.sidebar.subheader("Filter Data")
+station_filter = st.sidebar.selectbox("Pilih Stasiun", monthly_pm25['station'].unique())
+year_filter = st.sidebar.selectbox("Pilih Tahun", sorted(monthly_pm25['datetime'].dt.year.unique()))
 
-# Insight tentang distribusi PM2.5
-st.subheader("Insight dari Distribusi PM2.5")
-st.write(
-    """Dari distribusi PM2.5, kita dapat melihat bahwa nilai PM2.5 sebagian besar berada di bawah ambang batas 
-    yang ditetapkan oleh standar kualitas udara (75 µg/m³). Namun, terdapat fluktuasi yang signifikan, dengan 
-    beberapa titik data menunjukkan tingkat polusi yang sangat tinggi."""
-)
+# Filter data sesuai pilihan
+filtered_data = monthly_pm25[
+    (monthly_pm25['station'] == station_filter) &
+    (monthly_pm25['datetime'].dt.year == year_filter)
+]
+
+# Plot interaktif berdasarkan filter
+st.subheader(f"Tren PM2.5 Bulanan di {station_filter} - Tahun {year_filter}")
+fig, ax = plt.subplots(figsize=(12, 6))
+sns.lineplot(data=filtered_data, x='datetime', y='PM2.5', marker='o', ax=ax)
+ax.set_title(f"PM2.5 Bulanan di {station_filter} ({year_filter})")
+ax.set_xlabel("Bulan")
+ax.set_ylabel("PM2.5 (µg/m³)")
+st.pyplot(fig)
 
 # Insight Tren PM2.5 Bulanan
 df_filtered['month'] = df_filtered['datetime'].dt.month
@@ -159,19 +150,6 @@ st.write(
     """Dari tren bulanan, kita dapat melihat bahwa pada beberapa bulan, seperti bulan Desember dan Januari, 
     tingkat PM2.5 cenderung lebih tinggi, kemungkinan besar akibat pembakaran bahan bakar yang lebih intensif 
     selama musim dingin."""
-)
-
-# Korelasi antara PM2.5 dengan WSPM dan TEMP
-st.subheader("Korelasi antara PM2.5 dengan Kecepatan Angin (WSPM) dan Suhu (TEMP)")
-correlation = df_filtered[['PM2.5', 'WSPM', 'TEMP']].corr()
-fig5 = plt.figure(figsize=(8, 6))
-sns.heatmap(correlation, annot=True, cmap="coolwarm", vmin=-1, vmax=1, center=0)
-st.pyplot(fig5)
-
-st.write(
-    """Dari matriks korelasi, kita dapat melihat bahwa kecepatan angin (WSPM) memiliki korelasi negatif dengan PM2.5, 
-    yang berarti angin yang lebih kencang dapat membantu mengurangi konsentrasi PM2.5 di udara. Sementara itu, 
-    suhu (TEMP) cenderung memiliki korelasi positif yang moderat dengan PM2.5."""
 )
 
 # Function to categorize pollution levels
@@ -202,10 +180,8 @@ st.pyplot(fig3)
 st.subheader("Kesimpulan")
 st.write(
     """Berdasarkan analisis yang dilakukan, kita dapat menarik beberapa kesimpulan penting:
-    1. PM2.5 di wilayah yang lebih padat penduduknya seperti Aotizhongxin cenderung lebih tinggi, terutama 
-       pada musim dingin.
-    2. Angin memiliki dampak signifikan dalam menurunkan konsentrasi PM2.5.
-    3. Suhu lebih tinggi juga cenderung meningkatkan kadar PM2.5 di beberapa stasiun.
+    1. PM2.5 di wilayah perkotaan (Aotizhongxin) cenderung lebih tinggi daripada di wilayah suburban (Huairou).
+    2. 
     
     Analisis ini dapat menjadi referensi dalam pembuatan kebijakan untuk meningkatkan kualitas udara di perkotaan.
     """
