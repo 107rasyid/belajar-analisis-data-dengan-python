@@ -186,3 +186,42 @@ st.write(
     Analisis ini dapat menjadi referensi dalam pembuatan kebijakan untuk meningkatkan kualitas udara di perkotaan.
     """
 )
+
+# Halaman Komparasi Tren Dua Stasiun
+st.header("📊 Komparasi Tren PM2.5 Bulanan Antar Stasiun")
+
+# Pilih dua stasiun
+station_options = df["station"].unique().tolist()
+col1, col2 = st.columns(2)
+with col1:
+    stasiun_1 = st.selectbox("Pilih Stasiun 1", station_options, index=station_options.index("Aotizhongxin"))
+with col2:
+    stasiun_2 = st.selectbox("Pilih Stasiun 2", station_options, index=station_options.index("Huairou"))
+
+# Pilih tahun
+available_years = sorted(df["datetime"].dt.year.unique())
+selected_year = st.selectbox("Pilih Tahun", available_years, index=available_years.index(2014))
+
+# Filter data dua stasiun & tahun
+df_dua_stasiun = df[
+    (df["station"].isin([stasiun_1, stasiun_2])) &
+    (df["datetime"].dt.year == selected_year)
+].copy()
+
+# Hitung rata-rata bulanan
+monthly_comparison = df_dua_stasiun.groupby(
+    ['station', pd.Grouper(key='datetime', freq='M')]
+)['PM2.5'].mean().reset_index()
+
+# Plotting
+st.subheader(f"Perbandingan Tren PM2.5 Bulanan: {stasiun_1} vs {stasiun_2} - Tahun {selected_year}")
+fig5 = px.line(
+    monthly_comparison,
+    x='datetime', y='PM2.5',
+    color='station', markers=True,
+    title=f'Tren Bulanan PM2.5 di {stasiun_1} vs {stasiun_2} ({selected_year})'
+)
+fig5.update_layout(xaxis_title='Bulan', yaxis_title='PM2.5 (µg/m³)')
+st.plotly_chart(fig5, use_container_width=True)
+
+st.caption("Gunakan grafik ini untuk membandingkan dinamika polusi udara antara dua stasiun di tahun yang sama.")
