@@ -181,27 +181,22 @@ df_season = (
       .rename(columns={'mean':'Rata2','median':'Median','std':'StdDev','count':'N'})
 )
 
-# Print ringkasan statistik
-st.header("📊 perbedaan Rata-Rata Konsentrasi PM2.5 Antar Musim")
+# Bar Chart Interaktif rata-rata PM2.5 per musim
+st.header("📊 Perbedaan Rata-Rata Konsentrasi PM2.5 Antar Musim")
+fig_bar = px.bar(df_season, x=df_season.index, y='Rata2',
+                 labels={'x': 'Musim', 'Rata2': 'PM2.5 (µg/m³)'},
+                 title="Rata-Rata PM2.5 per Musim (Beijing, 2013–2017)")
+st.plotly_chart(fig_bar, use_container_width=True)
 
-# Bar Chart rata-rata PM2.5 per musim
-plt.figure(figsize=(8,5))
-plt.bar(df_season.index, df_season['Rata2'])
-plt.title("Rata-Rata PM2.5 per Musim (Beijing, 2013–2017)")
-plt.xlabel("Musim")
-plt.ylabel("PM2.5 (µg/m³)")
-plt.tight_layout()
-st.pyplot(plt.gcf())
-
-# Boxplot distribusi PM2.5 per musim
-plt.figure(figsize=(8,5))
-data = [df_clean[df_clean['season']==s]['PM2.5'] for s in df_season.index]
-plt.boxplot(data, labels=df_season.index)
-plt.title("Distribusi PM2.5 per Musim")
-plt.xlabel("Musim")
-plt.ylabel("PM2.5 (µg/m³)")
-plt.tight_layout()
-st.pyplot(plt.gcf())
+# Boxplot Interaktif distribusi PM2.5 per musim
+data = [df_clean[df_clean['season'] == s]['PM2.5'] for s in df_season.index]
+fig_box = go.Figure()
+for season, values in zip(df_season.index, data):
+    fig_box.add_trace(go.Box(y=values, name=season, boxmean=True))
+fig_box.update_layout(title="Distribusi PM2.5 per Musim",
+                      yaxis_title='PM2.5 (µg/m³)',
+                      xaxis_title='Musim')
+st.plotly_chart(fig_box, use_container_width=True)
 
 st.write(
     """Dari grafik tersebut, kita dapat melihat bahwa musim dingin mencatat rata-rata PM2.5 tertinggi (~95.7 µg/m³), 
@@ -221,21 +216,18 @@ def categorize_pollution(pm25):
     else:
         return 'Rendah'
 
-# Categorize pollution levels for each station
+# Kategori polusi tiap stasiun (Interaktif)
 st.header("📊 Level Polusi Tiap Stasiun")
 pm25_avg = df.groupby('station')['PM2.5'].mean().reset_index()
 pm25_avg['kategori'] = pm25_avg['PM2.5'].apply(categorize_pollution)
 
-# Plotting the pollution categories
-st.subheader("Kategori Tingkat Polusi Udara per Stasiun")
-fig3, ax3 = plt.subplots(figsize=(10, 6))
-sns.barplot(data=pm25_avg, x='station', y='PM2.5', hue='kategori', palette='viridis', dodge=False, ax=ax3)
-ax3.set_title('Kategori Tingkat Polusi Udara per Stasiun', fontsize=14)
-ax3.set_xlabel('Stasiun', fontsize=12)
-ax3.set_ylabel('Rata-Rata PM2.5 (µg/m³)', fontsize=12)
-ax3.set_xticklabels(ax3.get_xticklabels(), rotation=45)
-ax3.legend(title='Kategori')
-st.pyplot(fig3)
+# Interaktif Bar Plot
+fig_cat = px.bar(pm25_avg, x='station', y='PM2.5', color='kategori',
+                 title='Kategori Tingkat Polusi Udara per Stasiun',
+                 labels={'PM2.5': 'Rata-Rata PM2.5 (µg/m³)', 'station': 'Stasiun'},
+                 color_discrete_sequence=px.colors.sequential.Viridis)
+fig_cat.update_layout(xaxis_tickangle=-45)
+st.plotly_chart(fig_cat, use_container_width=True)
 
 # Kesimpulan
 st.subheader("Kesimpulan")
